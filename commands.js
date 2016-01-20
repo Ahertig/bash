@@ -1,96 +1,115 @@
 var fs = require('fs');
+var request = require('request');
 
 module.exports = {
-  pwd: function() {
-    process.stdout.write(process.argv[1]);
-    process.stdout.write('\nprompt > ');
+  pwd: function(done, givePrompt) {
+    var output = process.argv[1] + "\n";
+    done(output);
+    givePrompt();
   },
-  date: function() {
-    console.log(new Date());
-    process.stdout.write('\nprompt > ');
+  date: function(done, givePrompt) {
+    var output = new Date() + "\n";
+    done(output);
+    givePrompt();
   },
-  ls: function() {
+  ls: function(done, givePrompt) {
+    var output = "";
     fs.readdir('.', function(err, files) {
       if (err) throw err;
       files.forEach(function(file) {
-        process.stdout.write(file.toString() + "\n");
+        output += file.toString() + "\n";
       })
-      process.stdout.write("prompt > ");
+      done(output);
+      givePrompt();
     });
   }, 
-  echo: function(thingToEcho) {
-    process.stdout.write(thingToEcho);
+  echo: function(thingToEcho, done, givePrompt) {
+    var output = thingToEcho + "\n";
+    done(output);
+    givePrompt();
   },
-  cat: function(fileName) {
+  cat: function(fileName, done, givePrompt) {
+    var output = ""
     fs.readFile(fileName, 'utf8', function(err, data) {
       if (err) {
         return console.log(err);
       }
-      console.log(data);
-      process.stdout.write("prompt > ");
+      output += data + "\n";
+      done(output)
+      givePrompt();
     });
   },
-  head: function(fileName) {
+  head: function(fileName, done, givePrompt) {
     fs.readFile(fileName, 'utf8', function(err, data) {
       if (err) {
         return console.log(err);
       }
 
       var arr = data.split("\n").slice(0,5);
-      console.log(arr.join("\n"))
+      done(arr.join("\n"))
 
-      process.stdout.write("prompt > ");
+      givePrompt();
     });
   },
-  tail: function(fileName) {
+  tail: function(fileName, done, givePrompt) {
     fs.readFile(fileName, 'utf8', function(err, data) {
       if (err) {
         return console.log(err);
       }
       var arr = data.split("\n").slice(-5);
-      console.log(arr.join("\n"))
+      done(arr.join("\n"))
 
-      process.stdout.write("prompt > ");
+      givePrompt();
     });
   },
-  sortIt: function(fileName) {
+  sortIt: function(fileName, done, givePrompt) {
     fs.readFile(fileName, 'utf8', function(err, data) {
       if (err) {
         return console.log(err);
       }
       var arr = data.split("\n");
 
-      console.log(arr.sort().join("\n"))
+      done(arr.sort().join("\n"))
 
-      process.stdout.write("prompt > ");
+      givePrompt();
     });
   },
-  wc: function(fileName) {
+  wc: function(fileName, done, givePrompt) {
     fs.readFile(fileName, 'utf8', function(err, data) {
       if (err) {
         return console.log(err);
       }
       var arr = data.split("\n");
 
-      console.log(arr.length)
+      done(arr.length)
 
-      process.stdout.write("prompt > ");
+      givePrompt();
     });
   },
-  uniq: function(fileName) {
+  uniq: function(fileName, done, givePrompt) {
     fs.readFile(fileName, 'utf8', function(err, data) {
       if (err) {
         return console.log(err);
       }
       var arr = data.split("\n").sort();
+      var newArr = [];
 
       arr.forEach(function(elem) {
         if (newArr.indexOf(elem) < 0) {
-          newArr.push(elem)
+          newArr.push(elem);
         }
-      })
-      console.log(newArr)
-      process.stdout.write("prompt > ");
+      });
+      console.log(newArr);
+      done(newArr);
+      givePrompt();
+    });
+  },
+  curl: function(website, done, givePrompt) {
+    request("http://" + website, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+          done(body); // Show the HTML for the Google homepage.
+        }
+        givePrompt();
     });
   }
 }
